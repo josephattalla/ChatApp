@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Chat App</title>
+  </head>
+
+  <body>
+    <form id="user-id-form">
+      <input type="number" id="user-id" min="0" max="100" />
+      <input type="submit" id="user-id-submission-button" />
+    </form>
+
+    <form id="chat-form" onsubmit="handleMessageSubmission(event)" style="display: none;">
+      <input type="text" id="user-input" />
+      <input type="submit" />
+    </form>
+    <ul id="chats"></ul>
+    <script src="./static/index.js"></script>
+  </body>
+
+</html>
