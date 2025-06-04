@@ -6,7 +6,7 @@ You can install dependencies using the provided [conda](https://anaconda.org/ana
 If you don't want to use a conda env you can install the current dependencies:
 ```bash
 pip install fastapi
-pip install pyscopg2
+pip install psycopg2
 ```
 
 You will also need to have [PostgreSQL](https://www.postgresql.org/) on your device.
