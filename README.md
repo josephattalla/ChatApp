@@ -1,7 +1,7 @@
 # Chat Application
 
 ### Dependencies
-You can install dependencies using the provided [conda](https://anaconda.org/anaconda/conda) enviroment, `enviroment.yml`.
+You can install dependencies using the provided [conda](https://anaconda.org/anaconda/conda) enviroment, `backend/enviroment.yml`.
 
 If you don't want to use a conda env you can install the current dependencies:
 ```bash
@@ -14,10 +14,11 @@ You will also need to have [PostgreSQL](https://www.postgresql.org/) on your dev
 ### Running the App
 
 ```bash
+cd backend
 fastapi dev main.py
 ```
 
-### File Structure
+### Backend File Structure
 
 ```
 ├── config
