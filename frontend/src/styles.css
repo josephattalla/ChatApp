@@ -1,0 +1,45 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr min(40rem, 100%) 1fr;
+  grid-template-rows: auto 1fr;
+}
+
+body > * {
+  grid-column: 2;
+}
+
+header {
+  grid-row: 1;
+  background-color: lightgray;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+}
+
+header > h1 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+main {
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+main > div.message-container {
+  flex: 1 1 0;
+}
+
+main > textarea {
+  max-height: 9.5rem;
+  field-sizing: content;
+  resize: none;
+}
