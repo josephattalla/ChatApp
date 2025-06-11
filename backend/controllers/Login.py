@@ -22,6 +22,7 @@ fake_users_db = {
         # "full_name": "John Doe",
         # "email": "johndoe@example.com",
         "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+        "user_id": 1,
         # "disabled": False,
     }
 }
@@ -40,9 +41,10 @@ class TokenData(BaseModel):
 
 class User(BaseModel):
     username: str
-    email: str | None = None
-    full_name: str | None = None
-    disabled: bool | None = None
+    user_id: int
+    # email: str | None = None
+    # full_name: str | None = None
+    # disabled: bool | None = None
 
 
 class UserInDB(User):
@@ -52,8 +54,6 @@ class UserInDB(User):
 # setup auth
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-router = APIRouter()
 
 
 def verify_password(plain_password, hashed_password):
@@ -110,11 +110,15 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     return user
 
 
+router = APIRouter()
+
+
 @router.post("/login")
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> Token:
-    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    user = authenticate_user(
+        fake_users_db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
