@@ -5,9 +5,12 @@
 }
 
 body {
-  height: 100vh;
+  /* Prefer dvh over svh as only select content is scrolled. */
+  height: 100dvh;
   display: grid;
+  /* Content is centered with collapsable sides. */
   grid-template-columns: 1fr min(40rem, 100%) 1fr;
+  /* Header gets limited space; give remainder to main. */
   grid-template-rows: auto 1fr;
 }
 
@@ -22,7 +25,9 @@ header {
   grid-template-columns: auto 1fr auto;
 }
 
+/* Displays server name. */
 header > h1 {
+  /* Clips into ellipsis if name exceeds a single line. */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -40,6 +45,7 @@ main > div.message-container {
 
 main > textarea {
   max-height: 9.5rem;
+  /* Maybe move field-sizing to a @supports query. */
   field-sizing: content;
   resize: none;
 }
