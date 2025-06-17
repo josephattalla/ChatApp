@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from typing import Annotated
 
 from ..utils.SessionManager import sessionManager
-from .Login import oauth2_scheme, get_current_user
+from ..utils.auth import oauth2_scheme, get_current_user
 
 router = APIRouter()
 
