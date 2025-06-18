@@ -15,14 +15,7 @@ async def ws(room_id: int, user_id: int, session_id: str, websocket: WebSocket):
     # validity and mapping to which user
     # TODO: add database lookup to check validity of room id
 
-    print(
-        "**********************invalid",
-        sessionManager.invalidSession(user_id, session_id),
-        user_id,
-        session_id,
-    )
     if sessionManager.invalidSession(user_id, session_id):
-        print("**********************invalid")
         raise HTTPException(status_code=401, detail="Invalid creditation")
 
     sessionManager.deleteSession(user_id)
