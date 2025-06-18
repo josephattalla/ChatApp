@@ -7,6 +7,9 @@ If you don't want to use a conda env you can install the current dependencies:
 ```bash
 pip install fastapi
 pip install psycopg2
+pip install jwt
+pip install passlib[bcrypt]
+pip install bcrypt==4.0.1
 ```
 
 You will also need to have [PostgreSQL](https://www.postgresql.org/) on your device.
