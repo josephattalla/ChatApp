@@ -1,15 +1,18 @@
+:root {
+  --header-height: 3rem;
+}
+
 * {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  list-style: none;
 }
 
 body {
-  /* Prefer dvh over svh as only select content is scrolled. */
-  height: 100dvh;
   display: grid;
   /* Content is centered with collapsable sides. */
-  grid-template-columns: 1fr min(40rem, 100%) 1fr;
+  grid-template-columns: 1fr min(55rem, 100%) 1fr;
   /* Header gets limited space; give remainder to main. */
   grid-template-rows: auto 1fr;
 }
@@ -18,32 +21,72 @@ body > * {
   grid-column: 2;
 }
 
+/*
+ * Header component
+ */ 
+
 header {
   grid-row: 1;
   background-color: lightgray;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: 1fr auto;
+  height: var(--header-height);
+}
+
+
+/*
+ * Chat component
+ */
+
+.main-content {
+  max-height: calc(100vh - var(--header-height));
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  grid-template-rows: 1fr auto;
+  grid-template-areas:
+    "sidebar messages"
+    "sidebar chatbox";
+}
+
+/*
+ * Sidebar component
+ */
+
+.sidebar {
+  grid-area: sidebar;
+  background-color: grey;
+  overflow-y: auto;
+}
+
+.group-display {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  border: black solid 0.125rem;
 }
 
 /* Displays server name. */
-header > h1 {
+.server-name {
   /* Clips into ellipsis if name exceeds a single line. */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-main {
-  grid-row: 2;
-  display: flex;
-  flex-direction: column;
+.messages-container {
+  grid-area: messages;
+  overflow: auto;
 }
 
-main > div.message-container {
-  flex: 1 1 0;
+.message {
+  border: black solid 0.125rem;
+  height: 500px;
 }
 
-main > textarea {
+.chatbox {
+  grid-area: chatbox;
   max-height: 9.5rem;
   /* Maybe move field-sizing to a @supports query. */
   field-sizing: content;
