@@ -1,7 +1,3 @@
-:root {
-  --header-height: 3rem;
-}
-
 * {
   padding: 0;
   margin: 0;
@@ -13,12 +9,22 @@ body {
   display: grid;
   /* Content is centered with collapsable sides. */
   grid-template-columns: 1fr min(55rem, 100%) 1fr;
-  /* Header gets limited space; give remainder to main. */
-  grid-template-rows: auto 1fr;
 }
 
 body > * {
   grid-column: 2;
+}
+
+.app-content {
+  height: 100dvh;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: 15rem 1fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "header header"
+    "sidebar chat-content"
+    "sidebar chat-content";
 }
 
 /*
@@ -26,27 +32,10 @@ body > * {
  */ 
 
 header {
-  grid-row: 1;
+  grid-area: header;
   background-color: lightgray;
   display: grid;
   grid-template-columns: 1fr auto;
-  height: var(--header-height);
-}
-
-
-/*
- * Chat component
- */
-
-.main-content {
-  max-height: calc(100vh - var(--header-height));
-  grid-row: 2;
-  display: grid;
-  grid-template-columns: 15rem 1fr;
-  grid-template-rows: 1fr auto;
-  grid-template-areas:
-    "sidebar messages"
-    "sidebar chatbox";
 }
 
 /*
@@ -67,7 +56,6 @@ header {
   border: black solid 0.125rem;
 }
 
-/* Displays server name. */
 .server-name {
   /* Clips into ellipsis if name exceeds a single line. */
   white-space: nowrap;
@@ -75,18 +63,30 @@ header {
   text-overflow: ellipsis;
 }
 
+.chat-content {
+  grid-area: chat-content;
+  max-height: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto;
+}
+
 .messages-container {
-  grid-area: messages;
+  grid-row: 1;
   overflow: auto;
 }
 
 .message {
   border: black solid 0.125rem;
-  height: 500px;
+  min-height: 500px;
 }
 
 .chatbox {
-  grid-area: chatbox;
+  grid-row: 2;
+}
+
+.chat-textarea {
+  width: 100%;
+  display: block;
   max-height: 9.5rem;
   /* Maybe move field-sizing to a @supports query. */
   field-sizing: content;
