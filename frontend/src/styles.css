@@ -87,8 +87,14 @@ header {
 .chat-textarea {
   width: 100%;
   display: block;
-  max-height: 9.5rem;
-  /* Maybe move field-sizing to a @supports query. */
-  field-sizing: content;
+  min-height: 9lh;
   resize: none;
+}
+
+@supports (field-sizing: content) {
+  .chat-textarea {
+    min-height: 0;
+    max-height: 9lh;
+    field-sizing: content;
+  }
 }
