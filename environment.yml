@@ -43,7 +43,8 @@ dependencies:
       - markupsafe==3.0.2
       - mdurl==0.1.2
       - passlib==1.7.4
-      - psycopg2==2.9.10
+      - psycopg==3.2.9
+      - psycopg-binary==3.2.9
       - pydantic==2.11.5
       - pydantic-core==2.33.2
       - pygments==2.19.1
