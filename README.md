@@ -6,10 +6,11 @@ You can install dependencies using the provided [conda](https://anaconda.org/ana
 If you don't want to use a conda env you can install the current dependencies:
 ```bash
 pip install fastapi
-pip install psycopg2
-pip install jwt
+pip install psycopg[binary]
+pip install pyjwt
 pip install passlib[bcrypt]
 pip install bcrypt==4.0.1
+pip install pytest
 ```
 
 You will also need to have [PostgreSQL](https://www.postgresql.org/) on your device.
@@ -36,4 +37,3 @@ fastapi dev main.py
 - `models`: DB interface. Normally used to define the DB schemas, but the file in there now also has an interface to use the DB, making it simple and easy to use.
 - `static`: frontend files to serve to client.
 - `utils`: miscellaneous helpers.
-
