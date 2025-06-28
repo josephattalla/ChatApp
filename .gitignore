@@ -1,9 +1,4 @@
 __pycache__/
 .env
-*.vsidx
-/.vs/slnx.sqlite
-/.vs/slnx.sqlite
-/.gitignore
-/.gitignore
-/.gitignore
-/.gitignore
+*.vs*
+.vs/
