@@ -1,114 +1,364 @@
-import pyscopg
-from psycopg import sql
+import psycopg
+import psycopg.sql as sql
+from psycopg.rows import class_row
 
-#------------------Modifying rooms and messages-------------------#
+from .models import User, Chat, Room
 
-def createMsg(room_id, user_id, msg, time):  
-    with psycopg.connect("dbname = chatApp user=postgres") as conn:
-        with conn.cursor() as cur:
-            try:
-                cur.execute("""
-                INSERT INTO chats (chat_id, room_id, user_id, message, timestamp)
-                VALUES (next('chat_id'), %s, %s, %s, %s);
-                """, (room_id, user_id, msg, time))
-                cur.commit()
-            except:
-                return False
-    
-def removeMsg(chat_id):
-    with psycopg.connect("dbname = chatApp user=postgres") as conn:
-        with conn.cursor() as cur:
-            try:
-                cur.execute("""
-                SET ROLE Mod
-                DELETE FROM chats
-                WHERE chat_id = %s;
-                """, (chat_id))
-                cur.commit()
-            except:
-                return False
 
-def addRoom(room_name):
-    with psycopg.connect("dbname = chatApp user=postgres") as conn:
-        with conn.cursor() as cur:
+# ------------------Modifying rooms and messages-------------------#
+
+
+def createMsg(caller_role, room_id, user_id, msg):
+    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+        with conn.cursor(row_factory=class_row(Chat)) as cur:
             try:
-                cur.execute("""
-                SET ROLE Mod
-                INSERT INTO rooms (room_id, room_name) 
-                VALUES (nextval('room_id), %s);
-                """, (room_name))
+                cur.execute(sql.SQL("SET ROLE {}").format(
+                    sql.Identifier(caller_role)))
+                cur.execute(
+                    """
+                    INSERT INTO chats (room_id, user_id, message)
+                    VALUES (%s, %s, %s)
+                    RETURNING *;
+                    """,
+                    (room_id, user_id, msg),
+                )
+                inserted = cur.fetchone()
                 conn.commit()
-            except:
-                return False
+                return inserted
+            except Exception as e:
+                conn.rollback()
+                print("Error in createMsg:", e)
+                return None
 
-#------------------Modifying users and roles-------------------#
 
-def AddUser(user_name, hash_pass, role):
-    with psycopg.connect("dbname = chatApp user=postgres") as conn:
-        with conn.cursor() as cur:
+def removeMsg(caller_role, chat_id):
+    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+        with conn.cursor(row_factory=class_row(Chat)) as cur:
             try:
-                cur.execute("""
-                SET ROLE Mod
-                INSERT INTO Users (user_id, username, hashed_password, role) 
-                VALUES (next('user_id'),%s, %s, %s);
-                """, (user_name, hash_pass, role))
+                cur.execute(sql.SQL("SET ROLE {}").format(
+                    sql.Identifier(caller_role)))
+                cur.execute(
+                    """
+                    DELETE FROM chats
+                    WHERE chat_id = %s
+                    RETURNING *;
+                    """,
+                    (chat_id,),
+                )
+                deleted = cur.fetchone()
                 conn.commit()
-            except:
-                return False
+                return deleted
+            except Exception as e:
+                conn.rollback()
+                print("Error in removeMsg:", e)
+                return None
 
 
-def changeRole(userName, newRole):
-    with psycopg.connect("dbname = chatApp user=postgres") as conn:
-        with conn.cursor() as cur:
+def addRoom(caller_role, room_name):
+    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+        with conn.cursor(row_factory=class_row(Room)) as cur:
             try:
-                cur.execute("""
-                SET ROLE Mod
-                UPDATE users
-                SET role = %s
-                WHERE username = %s;
-                """, (userName, newRole))
+                cur.execute(sql.SQL("SET ROLE {}").format(
+                    sql.Identifier(caller_role)))
+                cur.execute(
+                    """
+                    INSERT INTO rooms (room_name)
+                    VALUES (%s)
+                    RETURNING *;
+                    """,
+                    (room_name,),
+                )
+                inserted = cur.fetchone()
                 conn.commit()
-            except:
-                return False
+                return inserted
+            except Exception as e:
+                conn.rollback()
+                print("Error in addRoom:", e)
+                return None
 
-#------------------------select statements----------------------#
 
-#shows chats by room_id
-def findRoomChats(room_id):
-    with psycopg.connect("dbname = chatApp user=postgres") as conn:
-        with conn.cursor() as cur:
+# ------------------Modifying users and roles-------------------#
+
+
+def addUser(caller_role, user_name, hash_pass, role="User"):
+    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+        with conn.cursor(row_factory=class_row(User)) as cur:
             try:
-                cur.execute("""
-                SELECT chats.message 
-                FROM chats 
-                WHERE room_id = %s;
-                """, (room_id))
+                cur.execute(sql.SQL("SET ROLE {}").format(
+                    sql.Identifier(caller_role)))
+                cur.execute(
+                    """
+                    INSERT INTO users (username, hashed_password, role)
+                    VALUES (%s, %s, %s)
+                    RETURNING *;
+                    """,
+                    (user_name, hash_pass, role),
+                )
+                inserted = cur.fetchone()
                 conn.commit()
-            except:
-                return False
+                return inserted
+            except Exception as e:
+                conn.rollback()
+                print("Error in addUser:", e)
+                return None
 
-#finds users by their username
-def findUser(userName):
-    with psycopg.connect("dbname = chatApp user=postgres") as conn:
-        with conn.cursor() as cur:
+
+def changeRole(caller_role, user_id, newRole):
+    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+        with conn.cursor(row_factory=class_row(User)) as cur:
             try:
-                cur.execute("""
-                SELECT * 
-                FROM users 
-                WHERE username = %s;""", (userName))
+                cur.execute(sql.SQL("SET ROLE {}").format(
+                    sql.Identifier(caller_role)))
+                cur.execute(
+                    """
+                    UPDATE users
+                    SET role = %s
+                    WHERE user_id = %s
+                    RETURNING *;
+                    """,
+                    (newRole, user_id),
+                )
+                updated = cur.fetchone()
                 conn.commit()
-            except:
-                return False
+                return updated
+            except Exception as e:
+                conn.rollback()
+                print("Error in changeRole:", e)
+                return None
 
-#shows available rooms
-def showRooms():
-    with psycopg.connect("dbname = chatApp user=postgres") as conn:
-        with conn.cursor() as cur:
+
+# ------------------------select statements----------------------#
+
+
+def findRoomChats(caller_role, room_id):
+    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+        with conn.cursor(row_factory=class_row(Chat)) as cur:
             try:
-                cur.execute("""
-                SELECT * 
-                FROM rooms;""")
-            except:
-                return False
+                cur.execute(sql.SQL("SET ROLE {}").format(
+                    sql.Identifier(caller_role)))
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM chats
+                    WHERE room_id = %s;
+                    """,
+                    (room_id,),
+                )
+                chats = cur.fetchall()
+                return chats
+            except Exception as e:
+                print("Error in findRoomChats:", e)
+                return None
 
-    conn.commit()
+
+def findUser(caller_role, user_id):
+    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+        with conn.cursor(row_factory=class_row(User)) as cur:
+            try:
+                cur.execute(sql.SQL("SET ROLE {}").format(
+                    sql.Identifier(caller_role)))
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM users
+                    WHERE user_id = %s;
+                    """,
+                    (user_id,),
+                )
+                user = cur.fetchone()
+                return user
+            except Exception as e:
+                print("Error in findUser:", e)
+                return None
+
+
+def findUserWithUsername(caller_role, username):
+    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+        with conn.cursor(row_factory=class_row(User)) as cur:
+            try:
+                cur.execute(sql.SQL("SET ROLE {}").format(
+                    sql.Identifier(caller_role)))
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM users
+                    WHERE username = %s;
+                    """,
+                    (username,),
+                )
+                user = cur.fetchone()
+                return user
+            except Exception as e:
+                print("Error in findUser:", e)
+                return None
+
+
+def showRooms(caller_role):
+    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+        with conn.cursor(row_factory=class_row(Room)) as cur:
+            try:
+                cur.execute(sql.SQL("SET ROLE {}").format(
+                    sql.Identifier(caller_role)))
+                cur.execute("SELECT * FROM rooms;")
+                rooms = cur.fetchall()
+                return rooms
+            except Exception as e:
+                print("Error in showRooms:", e)
+                return None
+
+
+def findRoom(caller_role, room_id):
+    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+        with conn.cursor(row_factory=class_row(Room)) as cur:
+            try:
+                cur.execute(sql.SQL("SET ROLE {}").format(
+                    sql.Identifier(caller_role)))
+                cur.execute("SELECT * FROM rooms WHERE room_id = %s;", (room_id,))
+                room = cur.fetchone()
+                return room
+            except Exception as e:
+                print("Error in find room:", e)
+                return None
+
+
+def findChat(caller_role, chat_id):
+    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+        with conn.cursor(row_factory=class_row(Chat)) as cur:
+            try:
+                cur.execute(sql.SQL("SET ROLE {}").format(
+                    sql.Identifier(caller_role)))
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM chats
+                    WHERE chat_id = %s;
+                    """,
+                    (chat_id,),
+                )
+                chat = cur.fetchone()
+                return chat
+            except Exception as e:
+                print("Error in find chat:", e)
+                return None
+
+
+def findUsers(caller_role):
+    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+        with conn.cursor(row_factory=class_row(User)) as cur:
+            try:
+                cur.execute(sql.SQL("SET ROLE {}").format(
+                    sql.Identifier(caller_role)))
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM users
+                    """,
+                )
+                users = cur.fetchall()
+                return users
+            except Exception as e:
+                print("Error in find users:", e)
+                return None
+
+
+# ------------------------testing----------------------#
+
+
+def insertTestData():
+    from .utils.auth import get_password_hash
+    data = {}
+
+    users = ["johndoe", "jojo", "justin", "gabe", "wilson"]
+    users_in_db = []
+    password = get_password_hash("secret")
+    for user in users:
+        users_in_db.append(addUser("Admin", user, password))
+
+    users_in_db.append(addUser("Admin", "admin", password, "Admin"))
+
+    data["users"] = users_in_db
+
+    rooms = ["cop4521 room", "cop4530 room", "javascript hate club"]
+    rooms_in_db = []
+    chats_in_db = []
+    for room in rooms:
+        rooms_in_db.append(addRoom("Admin", room))
+        for user in users_in_db:
+            chats_in_db.append(
+                createMsg(
+                    user.role,
+                    rooms_in_db[-1].room_id,
+                    user.user_id,
+                    "hello my name is " + user.username,
+                )
+            )
+
+    data["rooms"] = rooms_in_db
+    data["chats"] = chats_in_db
+
+    return data
+
+
+if __name__ == "__main__":
+    from .init_db import init_db
+
+    init_db()
+    data = insertTestData()
+
+    assert showRooms("User") == data["rooms"], "error 1 in show rooms"
+    assert showRooms("Mod") == data["rooms"], "error 2 in show rooms"
+    assert showRooms("Admin") == data["rooms"], "error 3 in show rooms"
+
+    print("==================show rooms works correctly==================")
+
+    for user in data["users"]:
+        assert findUser("Admin", user.user_id) == user, "error in find user"
+        assert findUser("Mod", user.user_id) is None, "error in find user"
+        assert findUser("User", user.user_id) is None, "error in find user"
+
+    print("==================find user works correctly==================")
+
+    for room in data["rooms"]:
+        room_chats = filter(lambda chat: chat.room_id == room.room_id, data["chats"])
+        room_chats = list(room_chats)
+        assert room_chats == findRoomChats("Admin", room.room_id), "error in find room chats"
+        assert room_chats == findRoomChats("Mod", room.room_id), "error in find room chats"
+        assert room_chats == findRoomChats("User", room.room_id), "error in find room chats"
+
+        assert room == findRoom("Admin", room.room_id), "error in find room"
+        assert room == findRoom("Mod", room.room_id), "error in find room"
+        assert room == findRoom("User", room.room_id), "error in find room"
+
+    print("==================find room, room chats works correctly==================")
+
+    for chat in data["chats"]:
+        assert chat == findChat("Admin", chat.chat_id), "error in find chat"
+        assert chat == findChat("Mod", chat.chat_id), "error in find chat"
+        assert chat == findChat("User", chat.chat_id), "error in find chat"
+
+    print("==================find chat works correctly==================")
+
+    assert findUsers("Admin") == data["users"], "error in find users"
+    assert findUsers("Mod") is None, "error in find users"
+    assert findUsers("User") is None, "error in find users"
+
+    print("==================find users works correcly==================")
+
+    assert data["chats"][0] == removeMsg("Admin", data["chats"][0].chat_id), "error in delete message"
+    assert data["chats"][1] == removeMsg("Mod", data["chats"][1].chat_id), "error in delete message"
+    assert removeMsg("User", data["chats"][2].chat_id) is None, "error in delete message"
+
+    assert data["chats"][0] not in findRoomChats("User", data["chats"][0].room_id), "error in delete message"
+    assert data["chats"][1] not in findRoomChats("User", data["chats"][1].room_id), "error in delete message"
+
+    print("==================deleting a message works correctly==================")
+
+    updatedUser = data["users"][0]
+    updatedUser.role = "Mod"
+    assert changeRole("Admin", updatedUser.user_id, "Mod") == updatedUser
+    assert changeRole("Mod", updatedUser.user_id, "Mod") is None
+    assert changeRole("User", updatedUser.user_id, "Mod") is None
+
+    assert findUser("Admin", updatedUser.user_id) == updatedUser
+
+    print("==================change role works correcly==================")
