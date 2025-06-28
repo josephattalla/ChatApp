@@ -7,7 +7,7 @@ from ..utils.auth import oauth2_scheme, get_current_user
 router = APIRouter()
 
 
-@router.post("/session")
+@router.post("/session", status_code=201)
 async def getSession(token: Annotated[str, Depends(oauth2_scheme)]):
     # verify user, sends 401 unauthorized if not verified
     user = await get_current_user(token)

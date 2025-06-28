@@ -2,18 +2,20 @@ from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 
 from ..utils.RoomsManager import roomsManager
 from ..utils.SessionManager import sessionManager
+from ..db_functions import findRoom, findUser, findRoomChats
 
 router = APIRouter()
-
-# TODO: implement as: /roomid?sessionid=...
-# fix 403 forbidden problem
 
 
 @router.websocket("/{room_id}")
 async def ws(room_id: int, user_id: int, session_id: str, websocket: WebSocket):
-    # TODO: change token to a session id & check its
-    # validity and mapping to which user
-    # TODO: add database lookup to check validity of room id
+    # check validity of room id & user id
+    user = findUser("Admin", user_id)
+    if not user:
+        raise HTTPException(status_code=400)
+    room = findRoom(user.role, room_id)
+    if not room:
+        raise HTTPException(status_code=400)
 
     if sessionManager.invalidSession(user_id, session_id):
         raise HTTPException(status_code=401, detail="Invalid creditation")
@@ -23,6 +25,23 @@ async def ws(room_id: int, user_id: int, session_id: str, websocket: WebSocket):
     await roomsManager.connect(room_id, websocket)
 
     try:
+        # send room chats to newly connected user
+        roomChats = findRoomChats(user.role, room.room_id)
+        if roomChats:
+            messages = []
+            for chat in roomChats:
+                chatUser = findUser("Admin", chat.user_id)
+                currChat = chat.model_dump()
+                currChat["time"] = str(currChat["time"])
+                messages.append(
+                    {
+                        "chat": currChat,
+                        "username": chatUser.username if chatUser else "",
+                    }
+                )
+            message = {"type": "room messages", "messages": messages}
+            await websocket.send_json(message)
+
         while True:
             data = await websocket.receive_text()
             print("received:", data)

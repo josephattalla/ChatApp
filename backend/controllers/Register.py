@@ -4,7 +4,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from pydantic.types import StringConstraints
 
-from ..utils.auth import UserInDB, fake_users_db, get_password_hash
+from ..utils.auth import get_password_hash
+from ..db_functions import addUser, findUserWithUsername
 
 
 class RegisterUser(BaseModel):
@@ -27,22 +28,21 @@ class RegisterUser(BaseModel):
 router = APIRouter()
 
 
-# TODO: implement with actual DB
 @router.post("/register", status_code=201)
 def register(registerData: RegisterUser):
     # check if username already in use
-    if registerData.username in fake_users_db:
+    if findUserWithUsername("Admin", registerData.username):
         raise HTTPException(status_code=409, detail="Username already in use.")
 
     # hash password
     hash_pass = get_password_hash(registerData.password)
 
     # add to DB
-    user = UserInDB(
-        username=registerData.username,
-        hashed_password=hash_pass,
-        user_id=1,
-    )
-    fake_users_db[user.username] = user.model_dump()
+    addedUser = addUser("Admin", registerData.username, hash_pass)
 
-    return
+    if not addedUser:
+        raise HTTPException(status_code=400)
+
+    del addedUser.hashed_password
+
+    return addedUser

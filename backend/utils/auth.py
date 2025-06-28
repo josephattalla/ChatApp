@@ -9,18 +9,7 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 
 from .. import config
-
-# example DB, password = secret
-fake_users_db = {
-    "johndoe": {
-        "username": "johndoe",
-        # "full_name": "John Doe",
-        # "email": "johndoe@example.com",
-        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-        "user_id": 0,
-        # "disabled": False,
-    }
-}
+from ..db_functions import findUserWithUsername
 
 
 # MODELS
@@ -28,22 +17,11 @@ class Token(BaseModel):
     access_token: str
     token_type: str
     username: str
+    user_id: int
 
 
 class TokenData(BaseModel):
     username: str | None = None
-
-
-class User(BaseModel):
-    username: str
-    user_id: int
-    # email: str | None = None
-    # full_name: str | None = None
-    # disabled: bool | None = None
-
-
-class UserInDB(User):
-    hashed_password: str
 
 
 # setup auth
@@ -59,14 +37,8 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def get_user(db, username: str | None):
-    if username and username in db:
-        user_dict = db[username]
-        return UserInDB(**user_dict)
-
-
-def authenticate_user(fake_db, username: str, password: str):
-    user = get_user(fake_db, username)
+def authenticate_user(username: str, password: str):
+    user = findUserWithUsername("Admin", username)
     if not user:
         return False
     if not verify_password(password, user.hashed_password):
@@ -76,12 +48,18 @@ def authenticate_user(fake_db, username: str, password: str):
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
+
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, config.SECRET_KEY, algorithm=config.ALGORITHM)
+    encoded_jwt = jwt.encode(
+        to_encode,
+        config.SECRET_KEY,
+        algorithm=config.ALGORITHM
+    )
     return encoded_jwt
 
 
@@ -91,17 +69,19 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
     try:
-        payload = jwt.decode(
-            token, config.SECRET_KEY, algorithms=[config.ALGORITHM]
-        )
+        payload = jwt.decode(token, config.SECRET_KEY,
+                             algorithms=[config.ALGORITHM])
         username = payload.get("sub")
         if username is None:
             raise credentials_exception
         token_data = TokenData(username=username)
     except InvalidTokenError:
         raise credentials_exception
-    user = get_user(fake_users_db, username=token_data.username)
+
+    user = findUserWithUsername("Admin", username=token_data.username)
     if user is None:
         raise credentials_exception
+
     return user
