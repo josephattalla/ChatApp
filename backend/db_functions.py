@@ -275,6 +275,8 @@ def insertTestData():
         users_in_db.append(addUser("Admin", user, password))
 
     users_in_db.append(addUser("Admin", "admin", password, "Admin"))
+    users_in_db.append(addUser("Admin", "mod", password, "Mod"))
+    users_in_db.append(addUser("Admin", "user", password, "User"))
 
     data["users"] = users_in_db
 
