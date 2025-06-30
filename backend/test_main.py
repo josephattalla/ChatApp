@@ -1,9 +1,11 @@
 from fastapi.testclient import TestClient
+import pytest
 
 from .main import app
 from .init_db import init_db
 from .db_functions import insertTestData
 from .utils.auth import create_access_token
+from .utils.SessionManager import sessionManager
 
 client = TestClient(app)
 
@@ -15,6 +17,14 @@ initialData = insertTestData()
 #       - all plain passwords are "secret"
 #   - ["rooms"]: list of inserted rooms, each a Room model from models.py
 #   - ["chats"]: list of inserted users, each a Chat model from models.py
+
+# Status Codes for testing
+# 200 = Successful get or put requests
+# 201 = Successful post request
+# 400 = Bad request (unauthorized action, post to nonexistent room, or invalid role)
+# 401 = No token provided / failed authentication checks
+# 409 = Data conflicts (in our case, duplicate usernames)
+# 422 = Unprocessable Entity (in our case, length bounds on data)
 
 # tokens to user to test user, mode, and user access to protected endpoints
 tokens = {"admin": "", "mod": "", "user": ""}
@@ -226,11 +236,100 @@ def test_admin():
     response = client.get("/api/users")
     assert response.status_code == 401
 
-    # TODO tests for Mod endpoints
-    # TODO tests for Websokcet endpoints
-    # TODO tests for session endpoints
+def test_mod():
+    # test mod successfully creating a room
+    response = client.post(
+        "/api/mod/room",
+        params={"room_name" : "ExampleRoom"},
+        headers={"Authorization" : f"bearer {tokens['mod']}"}
+    )
+    assert response.status_code == 201
+    assert response.json()["room_name"] == "ExampleRoom"
 
-# TODO: For each endpoint test:
+    # test when a "user" tries to create a room without permissions
+    response = client.post(
+        "/api/mod/room",
+        params={"room_name" : "ExampleRoom"},
+        headers={"Authorization" : f"bearer {tokens['user']}"}
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"] == "You do not have permission."
+
+    # test creating room with no token provided
+    response = client.post(
+        "/api/mod/room",
+        params={"room_name" : "ExampleRoom"}
+    )
+    assert response.status_code == 401
+
+    # test creating room with name too short
+    response = client.post(
+        "/api/mod/room",
+        params={"room_name" : ""},
+        headers={"Authorization" : f"bearer {tokens['mod']}"}
+    )
+    assert response.status_code == 422
+
+    # test creating room with name too long
+    response = client.post(
+        "/api/mod/room",
+        params={"room_name" : "thisnameisverylongforaroomtobenamed"},
+        headers={"Authorization" : f"bearer {tokens['mod']}"}
+    )
+    assert response.status_code == 422
+
+
+def test_websockets():
+    room_id = initialData["rooms"][0].room_id
+    user = initialData["users"][0]
+    user_id = user.user_id
+    session_id = "valid-session"
+
+    # adding a session manually for testing
+    sessionManager.addSession(user_id, session_id)
+
+    # test a successful connection
+    with client.websocket_connect(f"/api/ws/{room_id}?user_id={user_id}&session_id={session_id}") as websocket:
+        initial_data = websocket.receive_json()
+        assert "type" in initial_data
+        assert initial_data["type"] == "room messages"
+
+    # test invalid user_id
+    with pytest.raises(Exception):
+        with client.websocket_connect(f"/api/ws/{room_id}?user_id=9999&session_id={session_id}") as websocket:
+            websocket.receive_text()
+
+    # test invalid room_id
+    with pytest.raises(Exception):
+        with client.websocket_connect(f"/api/ws/9999?user_id={user_id}&session_id={session_id}") as websocket:
+            websocket.receive_text()
+
+    # test invalid session_id
+    with pytest.raises(Exception):
+        with client.websocket_connect(f"/api/ws/{room_id}?user_id={user_id}&session_id=invalid-session") as websocket:
+            websocket.receive_text()
+
+def test_session():
+    user = initialData["users"][0]
+    token = tokens["user"]
+
+    # test for valid token returning session id
+    response = client.post(
+        "api/session",
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    assert response.status_code == 201
+    assert "session_id" in response.json()
+    session_id = response.json()["session_id"]
+
+    assert sessionManager.validSession(user.user_id, session_id)
+
+    # test for no token
+    reponse = client.post("/api/session")
+    assert reponse.status_code == 401
+
+
+# TODO: For each endpoint tests:
 #   - invalid inputs (for posts or URLS w/queries)
 #   - invalid authentications via admin, mod, user tokens
 #       (for protected endpoints)
