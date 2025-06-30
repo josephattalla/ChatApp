@@ -22,6 +22,7 @@ for user in tokens.keys():
     tokens[user] = create_access_token(data={"sub": user})
 
 
+
 def test_register():
     # test registering w/invalid username
     data = {"username": "a", "password": "password1234"}
@@ -47,6 +48,7 @@ def test_register():
     assert response.json()["username"] == data["username"]
 
 
+
 def test_rooms():
     room_id = initialData["rooms"][0].room_id
 
@@ -64,7 +66,7 @@ def test_rooms():
     response = client.post(
         f"/api/rooms/{room_id}",
         json=data,
-        headers={"Authorization": "bearer " + tokens["user"]}
+        headers={"Authorization" :f"bearer {tokens['user']}"}
     )
     assert response.status_code == 201
     assert response.json()["message"] == data["message"]
@@ -72,12 +74,21 @@ def test_rooms():
     # declaring the message id to test the deletions later in function
     message_id = response.json()["chat_id"]
 
+    # test message that is too long
+    temp_long_message = "a" * 201
+    response = client.post(
+        f"/api/rooms/{room_id}",
+        json={"message": temp_long_message},
+        headers={"Authorization" :f"bearer {tokens['user']}"}
+        )
+    assert response.status_code in (400, 422)
+
     # test an invalid/empty message
     data = {"message": ""}
     response = client.post(
         f"/api/rooms/{room_id}",
         json=data,
-        headers={"Authorization": "bearer " + tokens["user"]}
+        headers={"Authorization" :f"bearer {tokens['user']}"}
     )
     assert response.status_code == 422
 
@@ -86,7 +97,7 @@ def test_rooms():
     response = client.post(
         "/api/rooms/9999",
         json=data,
-        headers={"Authorization": "bearer " + tokens["user"]}
+        headers={"Authorization" :f"bearer {tokens['user']}"}
     )
     assert response.status_code == 400
 
@@ -97,7 +108,7 @@ def test_rooms():
     # test valid deletion
     response = client.delete(
         f"/api/rooms/{room_id}/{message_id}",
-        headers={"Authorization": "bearer " + tokens["user"]}
+        headers={"Authorization" :f"bearer {tokens['user']}"}
     )
     assert response.status_code == 200
     assert response.json()["chat_id"] == message_id
@@ -105,7 +116,7 @@ def test_rooms():
     # test invalid message id
     response = client.delete(
         f"/api/rooms/{room_id}/99999",
-        headers={"Authorization": "bearer " + tokens["user"]}
+        headers={"Authorization" :f"bearer {tokens['user']}"}
     )
     assert response.status_code == 400
 
@@ -113,7 +124,7 @@ def test_rooms():
     response = client.delete(f"/api/rooms/{room_id}/{message_id}")
     assert response.status_code == 401
 
-    # TODO: finish testing rooms
+
 
 def test_login():
     # test successful login
@@ -142,7 +153,79 @@ def test_login():
     response = client.post("/api/login", data={"username": data["username"]})
     assert response.status_code == 422
 
-    # TODO tests for Admin endpoints
+    # test login attempt with nonexistent username
+    data = {
+        "username" : "place",
+        "password" : "holder"
+    }
+    response = client.post("/api/login", data=data)
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Incorrect username or password"
+
+    # test login with empty form request (no data entered)
+    response = client.post("/api/login")
+    assert response.status_code == 422
+
+
+
+def test_admin():
+    # test admin changing role successfully
+    target_user_id = initialData["users"][1].user_id
+    response = client.put(
+        "/api/role",
+        params={"user_id": target_user_id, "new_role": "Mod"},
+        headers={"Authorization" :f"bearer {tokens['admin']}"}
+    )
+    assert response.status_code == 200
+    assert response.json()["role"] == "Mod"
+
+    # test non-admin trying to change roles
+    response = client.put(
+        "/api/role",
+        params={"user_id": target_user_id, "new_role": "Mod"},
+        headers={"Authorization" :f"bearer {tokens['user']}"}
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"] == "You do not have permissions"
+
+    # test setting an invalid role
+    response = client.put(
+        "/api/role",
+        params={"user_id": target_user_id, "new_role": "FakeRole"},
+        headers={"Authorization" :f"bearer {tokens['admin']}"}
+    )
+    assert response.status_code == 400
+    assert "Invalid role" in response.json()["detail"]
+
+    # test changing role with no token possessed
+    response = client.put(
+        "/api/role",
+        params={"user_id" : target_user_id, "new_role" : "Mod"},
+    )
+    assert response.status_code == 401
+
+    # test admin successfully getting all users
+    response = client.get(
+        "/api/users",
+        headers={"Authorization" : f"bearer {tokens['admin']}"}
+    )
+    assert response.status_code == 200
+    assert isinstance(response.json()["users"], list)
+    assert len(response.json()["users"]) >= 1
+    assert "hashed_password" not in response.text
+
+    # test non-admin trying to get all users
+    response = client.put(
+        "/api/role",
+        headers={"Authorization" : f"bearer {tokens['mod']}"}
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"] == "You do not have permissions."
+
+    # test getting all users with no token
+    response = client.get("/api/users")
+    assert response.status_code == 401
+
     # TODO tests for Mod endpoints
     # TODO tests for Websokcet endpoints
     # TODO tests for session endpoints
