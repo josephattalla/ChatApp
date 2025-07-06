@@ -9,7 +9,7 @@ from .models import User, Chat, Room
 
 
 def createMsg(caller_role, room_id, user_id, msg):
-    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+    with psycopg.connect("dbname=chatapp user=postgres password=postgres host=localhost port=5432") as conn:
         with conn.cursor(row_factory=class_row(Chat)) as cur:
             try:
                 cur.execute(sql.SQL("SET ROLE {}").format(
@@ -32,7 +32,7 @@ def createMsg(caller_role, room_id, user_id, msg):
 
 
 def removeMsg(caller_role, chat_id):
-    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+    with psycopg.connect("dbname=chatapp user=postgres password=postgres host=localhost port=5432") as conn:
         with conn.cursor(row_factory=class_row(Chat)) as cur:
             try:
                 cur.execute(sql.SQL("SET ROLE {}").format(
@@ -55,7 +55,7 @@ def removeMsg(caller_role, chat_id):
 
 
 def addRoom(caller_role, room_name):
-    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+    with psycopg.connect("dbname=chatapp user=postgres password=postgres host=localhost port=5432") as conn:
         with conn.cursor(row_factory=class_row(Room)) as cur:
             try:
                 cur.execute(sql.SQL("SET ROLE {}").format(
@@ -81,7 +81,7 @@ def addRoom(caller_role, room_name):
 
 
 def addUser(caller_role, user_name, hash_pass, role="User"):
-    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+    with psycopg.connect("dbname=chatapp user=postgres password=postgres host=localhost port=5432") as conn:
         with conn.cursor(row_factory=class_row(User)) as cur:
             try:
                 cur.execute(sql.SQL("SET ROLE {}").format(
@@ -104,7 +104,7 @@ def addUser(caller_role, user_name, hash_pass, role="User"):
 
 
 def changeRole(caller_role, user_id, newRole):
-    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+    with psycopg.connect("dbname=chatapp user=postgres password=postgres host=localhost port=5432") as conn:
         with conn.cursor(row_factory=class_row(User)) as cur:
             try:
                 cur.execute(sql.SQL("SET ROLE {}").format(
@@ -131,7 +131,7 @@ def changeRole(caller_role, user_id, newRole):
 
 
 def findRoomChats(caller_role, room_id):
-    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+    with psycopg.connect("dbname=chatapp user=postgres password=postgres host=localhost port=5432") as conn:
         with conn.cursor(row_factory=class_row(Chat)) as cur:
             try:
                 cur.execute(sql.SQL("SET ROLE {}").format(
@@ -152,7 +152,7 @@ def findRoomChats(caller_role, room_id):
 
 
 def findUser(caller_role, user_id):
-    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+    with psycopg.connect("dbname=chatapp user=postgres password=postgres host=localhost port=5432") as conn:
         with conn.cursor(row_factory=class_row(User)) as cur:
             try:
                 cur.execute(sql.SQL("SET ROLE {}").format(
@@ -173,7 +173,7 @@ def findUser(caller_role, user_id):
 
 
 def findUserWithUsername(caller_role, username):
-    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+    with psycopg.connect("dbname=chatapp user=postgres password=postgres host=localhost port=5432") as conn:
         with conn.cursor(row_factory=class_row(User)) as cur:
             try:
                 cur.execute(sql.SQL("SET ROLE {}").format(
@@ -194,7 +194,7 @@ def findUserWithUsername(caller_role, username):
 
 
 def showRooms(caller_role):
-    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+    with psycopg.connect("dbname=chatapp user=postgres password=postgres host=localhost port=5432") as conn:
         with conn.cursor(row_factory=class_row(Room)) as cur:
             try:
                 cur.execute(sql.SQL("SET ROLE {}").format(
@@ -208,7 +208,7 @@ def showRooms(caller_role):
 
 
 def findRoom(caller_role, room_id):
-    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+    with psycopg.connect("dbname=chatapp user=postgres password=postgres host=localhost port=5432") as conn:
         with conn.cursor(row_factory=class_row(Room)) as cur:
             try:
                 cur.execute(sql.SQL("SET ROLE {}").format(
@@ -222,7 +222,7 @@ def findRoom(caller_role, room_id):
 
 
 def findChat(caller_role, chat_id):
-    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+    with psycopg.connect("dbname=chatapp user=postgres password=postgres host=localhost port=5432") as conn:
         with conn.cursor(row_factory=class_row(Chat)) as cur:
             try:
                 cur.execute(sql.SQL("SET ROLE {}").format(
@@ -243,7 +243,7 @@ def findChat(caller_role, chat_id):
 
 
 def findUsers(caller_role):
-    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+    with psycopg.connect("dbname=chatapp user=postgres password=postgres host=localhost port=5432") as conn:
         with conn.cursor(row_factory=class_row(User)) as cur:
             try:
                 cur.execute(sql.SQL("SET ROLE {}").format(

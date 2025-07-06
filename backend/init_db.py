@@ -3,15 +3,15 @@ import psycopg
 
 def init_db():
     # create the DB
-    with psycopg.connect("dbname=postgres user=postgres", autocommit=True) as conn:
-        conn.execute("DROP DATABASE IF EXISTS chatapp")
-        conn.execute('DROP ROLE IF EXISTS "Admin"')
-        conn.execute('DROP ROLE IF EXISTS "Mod"')
-        conn.execute('DROP ROLE IF EXISTS "User";')
-        conn.execute("CREATE DATABASE chatapp")
+    # with psycopg.connect("dbname=chatapp user=postgres password=postgres host=localhost port=5432", autocommit=True) as conn:
+    #     conn.execute("DROP DATABASE IF EXISTS chatapp")
+    #     conn.execute('DROP ROLE IF EXISTS "Admin"')
+    #     conn.execute('DROP ROLE IF EXISTS "Mod"')
+    #     conn.execute('DROP ROLE IF EXISTS "User";')
+    #     conn.execute("CREATE DATABASE chatapp")
 
     # metadata of DB
-    with psycopg.connect("dbname=chatapp user=postgres") as conn:
+    with psycopg.connect("dbname=chatapp user=postgres password=postgres host=localhost port=5432") as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 CREATE TABLE users(

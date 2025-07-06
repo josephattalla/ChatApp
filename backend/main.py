@@ -21,7 +21,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(Ws.router, prefix="/ws")
 app.include_router(Login.router, prefix="/api")
 app.include_router(Register.router, prefix="/api")
