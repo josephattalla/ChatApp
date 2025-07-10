@@ -43,8 +43,8 @@ export default function LoginPage({ onChange }) {
           <label htmlFor="username">Username</label>
           <input
             id="username"
+            value={username}
             onChange={event => setUsername(event.target.value)}
-            defaultValue="johndoe"
             type="text"
             name="username"
           />
@@ -53,7 +53,7 @@ export default function LoginPage({ onChange }) {
           <label htmlFor="password">Password</label>
           <input
             id="password"
-            defaultValue="secret"
+            value={password}
             onChange={event => setPassword(event.target.value)}
             type="text"
             name="password"
