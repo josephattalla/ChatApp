@@ -3,9 +3,11 @@ import { useState } from "react";
 export default function LoginPage({ onChange }) {
   const [username, setUsername] = useState("johndoe");
   const [password, setPassword] = useState("secret");
+  const [error, setError] = useState(null);
 
-  async function sendLogin() {
-    const response = await fetch("http://localhost:8000/api/login", {
+  function sendLogin() {
+    console.log("Start loading")
+    fetch("http://localhost:8000/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded"
@@ -15,12 +17,22 @@ export default function LoginPage({ onChange }) {
         password: password,
       }),
     })
+    .then(function(response) {
+      switch (response.status) {
+        case 401:
+          throw new Error("Bad Credentials");
+      }
+      return response.json();
+    })
+    .then(function(json) {
+      onChange(true);
 
-    if (response.status === 401) {
-      console.log("nah")
-    }
-
-    response.json().then(() => onChange(true));
+    })
+    // handle fetch failures and login problems
+    .catch(error => setError(error))
+    .finally(function() {
+      console.log("End loading")
+    })
   }
 
   return (
@@ -47,6 +59,9 @@ export default function LoginPage({ onChange }) {
             name="password"
           />
         </div>
+        { error &&
+          (<h1>{error.message}</h1>)
+        }
         <button type="submit">Login</button>
       </form>
     </div>
