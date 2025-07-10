@@ -1,12 +1,13 @@
 import { useState } from "react";
 
-export default function LoginPage({ onChange }) {
+export default function LoginPage({ onAuthenticated }) {
   const [username, setUsername] = useState("johndoe");
   const [password, setPassword] = useState("secret");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   function sendLogin() {
-    console.log("Start loading")
+    setLoading(true);
     fetch("http://localhost:8000/api/login", {
       method: "POST",
       headers: {
@@ -25,13 +26,12 @@ export default function LoginPage({ onChange }) {
       return response.json();
     })
     .then(function(json) {
-      onChange(true);
-
+      onAuthenticated(true);
     })
     // handle fetch failures and login problems
     .catch(error => setError(error))
     .finally(function() {
-      console.log("End loading")
+     setLoading(false);
     })
   }
 
@@ -45,7 +45,9 @@ export default function LoginPage({ onChange }) {
             id="username"
             value={username}
             onChange={event => setUsername(event.target.value)}
+            readOnly={loading}
             type="text"
+            required={true}
             name="username"
           />
         </div>
@@ -55,14 +57,16 @@ export default function LoginPage({ onChange }) {
             id="password"
             value={password}
             onChange={event => setPassword(event.target.value)}
+            readOnly={loading}
             type="text"
+            required={true}
             name="password"
           />
         </div>
         { error &&
           (<h1>{error.message}</h1>)
         }
-        <button type="submit">Login</button>
+        <button type="submit">{ loading ? "Loading" : "Login" }</button>
       </form>
     </div>
   )

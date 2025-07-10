@@ -9,9 +9,9 @@ function App() {
     <>
       <h1>ChatApp</h1>
       {authenticated ? (
-        <h1>Successfully authenticated</h1>
+        <h1>authenticated</h1>
       ): (
-        <LoginPage onChange={ setAuthenticated } />
+        <LoginPage onAuthenticated={ setAuthenticated } />
       )}
     </>
   )
