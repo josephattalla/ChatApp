@@ -4,7 +4,7 @@ export default function LoginPage({ onChange }) {
   const [username, setUsername] = useState("johndoe");
   const [password, setPassword] = useState("secret");
 
-  async function sendData() {
+  async function sendLogin() {
     const response = await fetch("http://localhost:8000/api/login", {
       method: "POST",
       headers: {
@@ -23,14 +23,10 @@ export default function LoginPage({ onChange }) {
     response.json().then(() => onChange(true));
   }
 
-  function submitHandler(formData) {
-    sendData(formData.get("username"), formData.get("password"));
-  }
-
   return (
     <div>
       <h1>Login</h1>
-      <form action={submitHandler}>
+      <form action={sendLogin}>
         <div>
           <label htmlFor="username">Username</label>
           <input
