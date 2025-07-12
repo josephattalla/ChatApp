@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AuthContext } from "./App";
 
-export default function LoginPage({ onAuthenticated }) {
-  const [username, setUsername] = useState("johndoe");
-  const [password, setPassword] = useState("secret");
+export default function LoginPage() {
+  const { setAuthenticated, setSessionToken, setUsername, setUserId } = useContext(AuthContext);
+  const [usernameField, setUsernameField] = useState("johndoe");
+  const [passwordField, setPasswordField] = useState("secret");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -14,8 +16,8 @@ export default function LoginPage({ onAuthenticated }) {
         "Content-Type": "application/x-www-form-urlencoded"
       },
       body: new URLSearchParams({
-        username: username,
-        password: password,
+        username: usernameField,
+        password: passwordField,
       }),
     })
     .then(function(response) {
@@ -26,7 +28,10 @@ export default function LoginPage({ onAuthenticated }) {
       return response.json();
     })
     .then(function(json) {
-      onAuthenticated(true);
+      setSessionToken(json.access_token);
+      setUserId(json.user_id);
+      setUsername(json.username);
+      setAuthenticated(true);
     })
     // handle fetch failures and login problems
     .catch(error => setError(error))
@@ -43,8 +48,8 @@ export default function LoginPage({ onAuthenticated }) {
           <label htmlFor="username">Username</label>
           <input
             id="username"
-            value={username}
-            onChange={event => setUsername(event.target.value)}
+            value={usernameField}
+            onChange={event => setUsernameField(event.target.value)}
             readOnly={loading}
             type="text"
             required={true}
@@ -55,8 +60,8 @@ export default function LoginPage({ onAuthenticated }) {
           <label htmlFor="password">Password</label>
           <input
             id="password"
-            value={password}
-            onChange={event => setPassword(event.target.value)}
+            value={passwordField}
+            onChange={event => setPasswordField(event.target.value)}
             readOnly={loading}
             type="text"
             required={true}
