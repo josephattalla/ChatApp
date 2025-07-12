@@ -7,6 +7,36 @@ export default function LoginPage() {
   const [passwordField, setPasswordField] = useState("secret");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isRegister, setIsRegister] = useState(false);
+  
+  function sendRegister() {
+    setLoading(true);
+    fetch("http://localhost:8000/api/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        username: usernameField,
+        password: passwordField,
+      }),
+    })
+    .then(function(response) {
+      switch (response.status) {
+        case 401:
+          throw new Error("Server error");
+      }
+      return response.json();
+    })
+    .then(function(json) {
+      console.log(json);
+      setIsRegister(false);
+    })
+    .catch(error => setError(error))
+    .finally(function() {
+      setLoading(false);
+    })
+  }
 
   function sendLogin() {
     setLoading(true);
@@ -42,8 +72,16 @@ export default function LoginPage() {
 
   return (
     <div>
-      <h1>Login</h1>
-      <form action={sendLogin}>
+      <h1>
+        { isRegister ? "Sign up for free" : "Sign in to your account" }
+      </h1>
+      <form action={isRegister ? sendRegister : sendLogin}>
+        <button
+          type="button"
+          onClick={() => setIsRegister(!isRegister)}
+        >
+          { isRegister ? "Sign in to your existing account" : "Sign up for a new account" }
+        </button>
         <div>
           <label htmlFor="username">Username</label>
           <input
@@ -71,7 +109,12 @@ export default function LoginPage() {
         { error &&
           (<h1>{error.message}</h1>)
         }
-        <button type="submit">{ loading ? "Loading" : "Login" }</button>
+        <button type="submit">
+          { 
+            loading ? "Loading" : 
+            isRegister ? "Sign up" : "Sign in"
+          }
+        </button>
       </form>
     </div>
   )
