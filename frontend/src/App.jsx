@@ -2,6 +2,7 @@ import { createContext, useState } from 'react'
 import './App.css'
 
 import LoginPage from './LoginPage';
+import ChatPage from "./ChatPage";
 
 export const AuthContext = createContext(null);
 
@@ -13,9 +14,10 @@ export function App() {
 
   return (
     <>
-      <h1>ChatApp</h1>
       {authenticated ? (
-        <h1>authenticated</h1>
+        <AuthContext.Provider>
+          <ChatPage />
+        </AuthContext.Provider>
       ): (
         // useContext is overkill for LoginPage until React Router impl
         <AuthContext.Provider value={{ setAuthenticated, setSessionToken, setUsername, setUserId }}>
