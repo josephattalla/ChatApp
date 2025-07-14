@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import { AuthContext } from "./App";
 
 export default function LoginPage() {
-  const { setAuthenticated, setSessionToken, setUsername, setUserId } = useContext(AuthContext);
+  const { setAuthenticated, setAccessToken, setUsername, setUserId } = useContext(AuthContext);
   const [usernameField, setUsernameField] = useState("johndoe");
   const [passwordField, setPasswordField] = useState("secret");
   const [loading, setLoading] = useState(false);
@@ -58,7 +58,7 @@ export default function LoginPage() {
       return response.json();
     })
     .then(function(json) {
-      setSessionToken(json.access_token);
+      setAccessToken(json.access_token);
       setUserId(json.user_id);
       setUsername(json.username);
       setAuthenticated(true);

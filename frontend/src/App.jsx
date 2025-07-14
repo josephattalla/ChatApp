@@ -8,19 +8,19 @@ export const AuthContext = createContext(null);
 
 export function App() {
   const [authenticated, setAuthenticated] = useState(false);
-  const [sessionToken, setSessionToken] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState("");
 
   return (
     <>
       {authenticated ? (
-        <AuthContext.Provider>
+        <AuthContext.Provider value={{ setAuthenticated, accessToken, username, userId }}>
           <ChatPage />
         </AuthContext.Provider>
-      ): (
+      ) : (
         // useContext is overkill for LoginPage until React Router impl
-        <AuthContext.Provider value={{ setAuthenticated, setSessionToken, setUsername, setUserId }}>
+        <AuthContext.Provider value={{ setAuthenticated, setAccessToken, setUsername, setUserId }}>
           <LoginPage />
         </AuthContext.Provider>
       )}
