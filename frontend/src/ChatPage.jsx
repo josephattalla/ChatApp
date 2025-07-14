@@ -7,6 +7,8 @@ import "./ChatPage.css";
 export default function ChatPage() {
   // sessionId for connecting to websocket
   const [sessionId, setSessionId] = useState(null);
+  const [rooms, setRooms] = useState([]);
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
   const { setAuthenticated, accessToken, username, userId } = useContext(AuthContext);
 
   useEffect(function getSessionId() {
@@ -34,6 +36,30 @@ export default function ChatPage() {
     });
   }, []);
 
+  useEffect(function getGroups() {
+    fetch("http://localhost:8000/api/rooms", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    })
+    .then(function(response) {
+      if (response.status === 401) {
+        throw new Error("Unauthorized: Retrying login");
+      }
+      return response.json();
+    })
+    .then(function(json) {
+      setRooms(json.rooms);
+    })
+    .catch(function(error) {
+      console.log(error.message);
+      // Reenter credentials if session id fetch fails.
+      setAuthenticated(false);
+    });
+  }, []);
+
   return (
     <div className="chatpage-body">
       <div className="app-content">
@@ -41,7 +67,7 @@ export default function ChatPage() {
           <h1 className="server-name">Server name</h1>
           <button>Profile</button>
         </header>
-        <Sidebar sessionId={sessionId} />
+        <Sidebar rooms={rooms} setSelectedRoomId={setSelectedRoomId} />
         <main className="chat-content">
           <div className="messages-container">
             <div className="message">Messages go here</div>
