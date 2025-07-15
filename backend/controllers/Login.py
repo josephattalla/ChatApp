@@ -35,4 +35,5 @@ async def login_for_access_token(
         token_type="bearer",
         username=user.username,
         user_id=user.user_id,
+        user_role=user.role
     )
