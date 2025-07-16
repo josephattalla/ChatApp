@@ -1,5 +1,5 @@
-import { useEffect, useRef, useContext } from "react"
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import { useEffect, useContext } from "react"
+import useWebSocket from "react-use-websocket";
 import { AuthContext } from "./App";
 
 export default function ChatContent({ sessionId, selectedRoom }) {
