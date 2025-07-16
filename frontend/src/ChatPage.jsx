@@ -81,9 +81,7 @@ export default function ChatPage() {
 
   let renderedChatContent;
   if (selectedRoomId) {
-    const selectedRoom = rooms.find(function(room) {
-      return room.room_id == selectedRoomId;
-    });
+    const selectedRoom = rooms.find(room => room.room_id === selectedRoomId);
     renderedChatContent = (
       // setting a key forces remount on new room, causing the websocket to close
       <ChatContent
