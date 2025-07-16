@@ -1,4 +1,4 @@
-export default function Sidebar({ rooms, setSelectedRoomId }) {
+export default function Sidebar({ rooms, handleRoomPick }) {
   const groupList = rooms.map(function({ room_id, room_name }) {
     return (
       <li
@@ -13,7 +13,7 @@ export default function Sidebar({ rooms, setSelectedRoomId }) {
   function groupListClickHandler(event) {
     const selectedId = Number(event.target.dataset.roomId);
     if (!Number.isNaN(selectedId)) {
-      setSelectedRoomId(selectedId);
+      handleRoomPick(selectedId);
     }
   };
 

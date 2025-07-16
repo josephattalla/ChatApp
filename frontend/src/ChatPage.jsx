@@ -2,16 +2,26 @@ import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "./App";
 
 import Sidebar from "./Sidebar";
+import ChatContent from "./ChatContent";
 import "./ChatPage.css";
 
 export default function ChatPage() {
-  // sessionId for connecting to websocket
   const [sessionId, setSessionId] = useState(null);
   const [rooms, setRooms] = useState([]);
+  // RoomID is selected before being able to fetch to SessionID.
+  // This causes ChatContent to use an invalid Session ID upon rerendering on a
+  // new RoomID. Solution: User chosen RoomID is marked pending and only set as
+  // the true RoomID when the SessionID is available.
+  const [pendingRoomId, setPendingRoomId] = useState(null);
   const [selectedRoomId, setSelectedRoomId] = useState(null);
   const { setAuthenticated, accessToken, username, userId } = useContext(AuthContext);
 
   useEffect(function getSessionId() {
+    if (pendingRoomId === null) {
+      return;
+    }
+    setSessionId(null);
+
     // Acquire session id by providing access token
     fetch("http://localhost:8000/api/session", {
       method: "POST",
@@ -28,13 +38,14 @@ export default function ChatPage() {
     })
     .then(function(json) {
       setSessionId(json.session_id);
+      setSelectedRoomId(pendingRoomId);
     })
     .catch(function(error) {
       console.log(error.message);
       // Reenter credentials if session id fetch fails.
       setAuthenticated(false);
     });
-  }, []);
+  }, [pendingRoomId]);
 
   useEffect(function getGroups() {
     fetch("http://localhost:8000/api/rooms", {
@@ -60,6 +71,31 @@ export default function ChatPage() {
     });
   }, []);
 
+  // Immediately stop ChatContent from rendering while fetching new SessionId.
+  function handleRoomPick(roomId) {
+    setPendingRoomId(roomId);
+    setSelectedRoomId(null);
+  }
+
+  let renderedChatContent;
+  if (selectedRoomId) {
+    const selectedRoom = rooms.find(function(room) {
+      return room.room_id == selectedRoomId;
+    });
+    renderedChatContent = (
+      // setting a key forces remount on new room, causing the websocket to close
+      <ChatContent
+        key={selectedRoomId}
+        sessionId={sessionId}
+        selectedRoom={selectedRoom}
+      />
+    )
+  } else if (pendingRoomId) {
+    renderedChatContent = <h1>Loading Room</h1>;
+  } else {
+    renderedChatContent = <h1>No Room Selected</h1>;
+  }
+
   return (
     <div className="chatpage-body">
       <div className="app-content">
@@ -67,24 +103,8 @@ export default function ChatPage() {
           <h1 className="server-name">Server name</h1>
           <button>Profile</button>
         </header>
-        <Sidebar rooms={rooms} setSelectedRoomId={setSelectedRoomId} />
-        <main className="chat-content">
-          <div className="messages-container">
-            <div className="message">Messages go here</div>
-            <div className="message">Messages go here</div>
-            <div className="message">Messages go here</div>
-            <div className="message">Messages go here</div>
-          </div>
-          <form action="" className="chatbox">
-            <textarea
-              name=""
-              id="chat-textarea"
-              className="chat-textarea"
-              placeholder="Type away..."
-            >
-            </textarea>
-          </form>
-        </main>
+        <Sidebar rooms={rooms} handleRoomPick={handleRoomPick} />
+        {renderedChatContent}
       </div>
     </div>
   )
