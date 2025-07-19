@@ -73,8 +73,10 @@ export default function ChatPage() {
 
   // Immediately stop ChatContent from rendering while fetching new SessionId.
   function handleRoomPick(roomId) {
-    setPendingRoomId(roomId);
-    setSelectedRoomId(null);
+    if (roomId !== pendingRoomId) {
+      setPendingRoomId(roomId);
+      setSelectedRoomId(null);
+    }
   }
 
   let renderedChatContent;
