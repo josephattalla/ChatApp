@@ -5,7 +5,7 @@ import Sidebar from "./Sidebar";
 import ChatContent from "./ChatContent";
 import "./ChatPage.css";
 
-export default function ChatPage() {
+export default function ChatPage({ setSelectedPage }) {
   const [sessionId, setSessionId] = useState(null);
   const [rooms, setRooms] = useState([]);
   // RoomID is selected before being able to fetch to SessionID.
@@ -102,7 +102,9 @@ export default function ChatPage() {
       <div className="app-content">
         <header className="chatpage-header">
           <h1 className="server-name">{selectedRoom?.room_name ?? ""}</h1>
-          <button>Profile</button>
+          <button onClick={() => setSelectedPage("settings")}>
+            Settings
+          </button>
         </header>
         <Sidebar rooms={rooms} handleRoomPick={handleRoomPick} />
         {renderedChatContent}

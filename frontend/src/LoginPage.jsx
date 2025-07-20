@@ -1,7 +1,7 @@
 import { useState, useContext } from "react";
 import { AuthContext } from "./App";
 
-export default function LoginPage() {
+export default function LoginPage({ setSelectedPage }) {
   const { setAuthenticated, setAccessToken, setUsername, setUserId } = useContext(AuthContext);
   const [usernameField, setUsernameField] = useState("johndoe");
   const [passwordField, setPasswordField] = useState("secret");
@@ -29,7 +29,6 @@ export default function LoginPage() {
       return response.json();
     })
     .then(function(json) {
-      console.log(json);
       setIsRegister(false);
     })
     .catch(error => setError(error))
@@ -62,6 +61,7 @@ export default function LoginPage() {
       setUserId(json.user_id);
       setUsername(json.username);
       setAuthenticated(true);
+      setSelectedPage("chat");
     })
     // handle fetch failures and login problems
     .catch(error => setError(error))
@@ -110,8 +110,8 @@ export default function LoginPage() {
           (<h1>{error.message}</h1>)
         }
         <button type="submit">
-          { 
-            loading ? "Loading" : 
+          {
+            loading ? "Loading" :
             isRegister ? "Sign up" : "Sign in"
           }
         </button>
