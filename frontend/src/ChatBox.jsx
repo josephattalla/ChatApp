@@ -19,15 +19,6 @@ export default function ChatBox({ roomMessages, setRoomMessages, roomId }) {
         message: message.trim(),
       }),
     })
-    .then(function(response) {
-      return response.json();
-    })
-    .then(function(json) {
-      setRoomMessages([...roomMessages, {
-        username: username,
-        chat: json,
-      }])
-    })
     .catch(function(error) {
       console.log(error.message);
       setAuthenticated(false);
