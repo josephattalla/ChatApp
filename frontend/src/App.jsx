@@ -20,7 +20,13 @@ export function App() {
         </AuthContext.Provider>
       ) : (
         // useContext is overkill for LoginPage until React Router impl
-        <AuthContext.Provider value={{ setAuthenticated, setAccessToken, setUsername, setUserId }}>
+        <AuthContext.Provider value={{ 
+          setAuthenticated,
+          setAccessToken,
+          username,
+          setUsername,
+          setUserId
+        }}>
           <LoginPage />
         </AuthContext.Provider>
       )}

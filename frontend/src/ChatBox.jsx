@@ -1,0 +1,63 @@
+import { useContext, useState } from "react"
+import { AuthContext } from "./App";
+
+export default function ChatBox({ roomMessages, setRoomMessages, roomId }) {
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { setAuthenticated, accessToken, username } = useContext(AuthContext);
+
+  function sendMessage() {
+    setLoading(true);
+
+    fetch(`http://localhost:8000/api/rooms/${roomId}`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: message.trim(),
+      }),
+    })
+    .then(function(response) {
+      return response.json();
+    })
+    .then(function(json) {
+      setRoomMessages([...roomMessages, {
+        username: username,
+        chat: json,
+      }])
+    })
+    .catch(function(error) {
+      console.log(error.message);
+      setAuthenticated(false);
+    })
+    .finally(function() {
+      setLoading(false)
+      setMessage("");
+    });
+  }
+
+  function handleEnterKeydown(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      if (!message.trim()) {
+        return;
+      }
+      event.preventDefault();
+      sendMessage();
+    }
+  }
+
+  return (
+    <form action="" className="chatbox">
+      <textarea
+        id="chat-textarea"
+        className="chat-textarea"
+        placeholder="Type away..."
+        onChange={event => setMessage(event.target.value)}
+        onKeyDown={handleEnterKeydown}
+        value={message}
+      />
+    </form>
+  )
+}

@@ -1,6 +1,7 @@
 import { useEffect, useContext, useState } from "react"
 import useWebSocket from "react-use-websocket";
 import { AuthContext } from "./App";
+import ChatBox from "./ChatBox";
 
 export default function ChatContent({ sessionId, selectedRoom }) {
   const { setAuthenticated, accessToken, userId } = useContext(AuthContext);
@@ -45,15 +46,11 @@ export default function ChatContent({ sessionId, selectedRoom }) {
       <section className="messages-container">
         {renderedMessages}
       </section>
-      <form action="" className="chatbox">
-        <textarea
-          name=""
-          id="chat-textarea"
-          className="chat-textarea"
-          placeholder="Type away..."
-        >
-        </textarea>
-      </form>
+      <ChatBox
+        roomMessages={roomMessages}
+        setRoomMessages={setRoomMessages}
+        roomId={selectedRoom.room_id}
+      />
     </main>
   )
 }
