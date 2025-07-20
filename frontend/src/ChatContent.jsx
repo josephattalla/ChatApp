@@ -25,6 +25,12 @@ export default function ChatContent({ sessionId, selectedRoom }) {
   useEffect(function() {
     if (lastJsonMessage?.type === "room messages") {
       setRoomMessages(lastJsonMessage.messages);
+    } else if (lastJsonMessage?.type === "new chat") {
+      setRoomMessages([...roomMessages, {
+        username: lastJsonMessage.username,
+        chat: lastJsonMessage.chat,
+      }])
+
     }
   }, [lastJsonMessage]);
 
