@@ -80,8 +80,9 @@ export default function ChatPage() {
   }
 
   let renderedChatContent;
+  let selectedRoom;
   if (selectedRoomId) {
-    const selectedRoom = rooms.find(room => room.room_id === selectedRoomId);
+    selectedRoom = rooms.find(room => room.room_id === selectedRoomId);
     renderedChatContent = (
       // setting a key forces remount on new room, causing the websocket to close
       <ChatContent
@@ -100,7 +101,7 @@ export default function ChatPage() {
     <div className="chatpage-body">
       <div className="app-content">
         <header className="chatpage-header">
-          <h1 className="server-name">Server name</h1>
+          <h1 className="server-name">{selectedRoom?.room_name ?? ""}</h1>
           <button>Profile</button>
         </header>
         <Sidebar rooms={rooms} handleRoomPick={handleRoomPick} />
