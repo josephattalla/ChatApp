@@ -2,7 +2,13 @@ import { useState, useContext } from "react";
 import { AuthContext } from "./App";
 
 export default function LoginPage({ setSelectedPage }) {
-  const { setAuthenticated, setAccessToken, setUsername, setUserId } = useContext(AuthContext);
+  const {
+    setAuthenticated,
+    setAccessToken,
+    setUsername,
+    setUserId,
+    setUserRole,
+  } = useContext(AuthContext);
   const [usernameField, setUsernameField] = useState("johndoe");
   const [passwordField, setPasswordField] = useState("secret");
   const [loading, setLoading] = useState(false);
@@ -60,6 +66,7 @@ export default function LoginPage({ setSelectedPage }) {
       setAccessToken(json.access_token);
       setUserId(json.user_id);
       setUsername(json.username);
+      setUserRole(json.user_role);
       setAuthenticated(true);
       setSelectedPage("chat");
     })

@@ -12,6 +12,7 @@ export function App() {
   const [accessToken, setAccessToken] = useState(null);
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState("");
+  const [userRole, setUserRole] = useState("");
   const [selectedPage, setSelectedPage] = useState("");
 
   let renderedPage;
@@ -22,19 +23,28 @@ export function App() {
         setAccessToken,
         username,
         setUsername,
-        setUserId
+        setUserId,
+        setUserRole
       }}>
         <LoginPage setSelectedPage={setSelectedPage} />
       </AuthContext.Provider>
-    )
+    );
   } else if (selectedPage === "chat") {
     renderedPage = (
-      <AuthContext.Provider value={{ setAuthenticated, accessToken, username, userId }}>
+      <AuthContext.Provider
+        value={{ setAuthenticated, accessToken, username, userId }}
+      >
         <ChatPage setSelectedPage={setSelectedPage} />
       </AuthContext.Provider>
-    )
+    );
   } else if (selectedPage === "settings") {
-    renderedPage = SettingsPage();
+    renderedPage = (
+      <AuthContext.Provider
+        value={{ setAuthenticated, accessToken, username, userRole }}
+      >
+        <SettingsPage setSelectedPage={setSelectedPage}/>
+      </AuthContext.Provider>
+    );
   } else {
     renderedPage = <p1>Something went very, very wrong here.</p1>;
   }
