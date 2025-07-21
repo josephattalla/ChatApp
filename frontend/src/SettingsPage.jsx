@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "./App";
+import AdminViewUsersListing from "./AdminViewUsersListing";
 
 export default function SettingsPage({ setSelectedPage }) {
   const [users, setUsers] = useState([]);
@@ -7,10 +8,15 @@ export default function SettingsPage({ setSelectedPage }) {
     setAuthenticated,
     accessToken,
     username,
+    userId,
     userRole,
   } = useContext(AuthContext);
 
-  useEffect(function getUsers() {
+  useEffect(function() {
+    getUsers();
+  }, []);
+
+  function getUsers() {
     if (userRole === "Admin") {
       fetch("http://localhost:8000/api/admin/users", {
         method: "GET",
@@ -23,25 +29,39 @@ export default function SettingsPage({ setSelectedPage }) {
         return response.json();
       })
       .then(function(json) {
-        setUsers(json.users);
+        setUsers(json.users.sort((userA, userB) => {
+          const usernameA = userA.username.toLowerCase()
+          const usernameB = userB.username.toLowerCase()
+          if (usernameA < usernameB) {
+            return -1;
+          } else if (usernameA > usernameB) {
+            return 1;
+          } else {
+            return 0;
+          }
+        }))
       })
       .catch(function(error) {
         console.log(error);
         setAuthenticated(false);
       });
     }
-  }, []);
+  }
 
-  const renderedUsers = users.map(function({ username, role, user_id }) {
-    return (
-      <li
-        key={user_id}
-        data-user-id={user_id}
-      >
-        <h3>{username} ({role})</h3>
-      </li>
-    );
-  });
+  /* List all users but self and display buttons to change their roles. */
+  const renderedUsers = users
+      .filter(({ user_id: listUserId }) => listUserId != userId)
+      .map(({ username, role, user_id: userId }) => {
+        return (
+          <AdminViewUsersListing
+            key={userId}
+            username={username}
+            role={role}
+            userId={userId}
+            onChange={getUsers}
+          />
+        );
+      });
 
   return (
     <>
@@ -52,11 +72,18 @@ export default function SettingsPage({ setSelectedPage }) {
       </header>
       <main>
         <h1>Settings</h1>
-        <h2>{username} ({userRole})</h2>
+        <h2>Logged in: {username} ({userRole})</h2>
         <button onClick={() => setAuthenticated(false)}>
           Logout
         </button>
-        {renderedUsers}
+        { userRole === "Admin" &&
+          <div>
+            <h2>Current Users:</h2>
+            <ul>
+              {renderedUsers}
+            </ul>
+          </div>
+        }
       </main>
     </>
   );

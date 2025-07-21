@@ -40,7 +40,7 @@ export function App() {
   } else if (selectedPage === "settings") {
     renderedPage = (
       <AuthContext.Provider
-        value={{ setAuthenticated, accessToken, username, userRole }}
+        value={{ setAuthenticated, accessToken, username, userRole, userId }}
       >
         <SettingsPage setSelectedPage={setSelectedPage}/>
       </AuthContext.Provider>
