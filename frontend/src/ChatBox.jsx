@@ -1,10 +1,10 @@
 import { useContext, useState } from "react"
 import { AuthContext } from "./App";
 
-export default function ChatBox({ roomMessages, setRoomMessages, roomId }) {
+export default function ChatBox({ roomId }) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const { setAuthenticated, accessToken, username } = useContext(AuthContext);
+  const { setAuthenticated, accessToken } = useContext(AuthContext);
 
   function sendMessage() {
     setLoading(true);

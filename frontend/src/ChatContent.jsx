@@ -9,7 +9,6 @@ export default function ChatContent({ sessionId, selectedRoom }) {
   const [loading, setLoading] = useState(false);
   const WS_URL = `ws://localhost:8000/ws/${selectedRoom.room_id}`;
   const {
-    sendJsonMessage,
     lastJsonMessage,
   } = useWebSocket(
     WS_URL,
@@ -69,9 +68,7 @@ export default function ChatContent({ sessionId, selectedRoom }) {
   let messageDeleteButton = null;
   if (userRole === "Admin" || userRole === "Mod") {
      messageDeleteButton = (
-      <button
-        disabled={loading}
-      >
+      <button disabled={loading}>
         Delete
       </button>
     );
@@ -98,11 +95,7 @@ export default function ChatContent({ sessionId, selectedRoom }) {
       >
         {renderedMessages}
       </section>
-      <ChatBox
-        roomMessages={roomMessages}
-        setRoomMessages={setRoomMessages}
-        roomId={selectedRoom.room_id}
-      />
+      <ChatBox roomId={selectedRoom.room_id} />
     </main>
   )
 }
