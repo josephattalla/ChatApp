@@ -14,7 +14,9 @@ export default function ChatPage({ setSelectedPage }) {
   // the true RoomID when the SessionID is available.
   const [pendingRoomId, setPendingRoomId] = useState(null);
   const [selectedRoomId, setSelectedRoomId] = useState(null);
-  const { setAuthenticated, accessToken, username, userId } = useContext(AuthContext);
+  const { setAuthenticated, accessToken } = useContext(AuthContext);
+
+  useEffect(() => getGroups(), []);
 
   useEffect(function getSessionId() {
     if (pendingRoomId === null) {
@@ -47,7 +49,7 @@ export default function ChatPage({ setSelectedPage }) {
     });
   }, [pendingRoomId]);
 
-  useEffect(function getGroups() {
+  function getGroups() {
     fetch("http://localhost:8000/api/rooms", {
       method: "GET",
       headers: {
@@ -69,7 +71,7 @@ export default function ChatPage({ setSelectedPage }) {
       // Reenter credentials if session id fetch fails.
       setAuthenticated(false);
     });
-  }, []);
+  }
 
   // Immediately stop ChatContent from rendering while fetching new SessionId.
   function handleRoomPick(roomId) {
@@ -106,7 +108,7 @@ export default function ChatPage({ setSelectedPage }) {
             Settings
           </button>
         </header>
-        <Sidebar rooms={rooms} handleRoomPick={handleRoomPick} />
+        <Sidebar getGroups={getGroups} rooms={rooms} handleRoomPick={handleRoomPick} />
         {renderedChatContent}
       </div>
     </div>

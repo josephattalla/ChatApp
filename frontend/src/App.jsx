@@ -32,7 +32,7 @@ export function App() {
   } else if (selectedPage === "chat") {
     renderedPage = (
       <AuthContext.Provider
-        value={{ setAuthenticated, accessToken, username, userId }}
+        value={{ setAuthenticated, accessToken, username, userId, userRole }}
       >
         <ChatPage setSelectedPage={setSelectedPage} />
       </AuthContext.Provider>
