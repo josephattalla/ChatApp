@@ -48,6 +48,7 @@ export default function ChatBox({ roomMessages, setRoomMessages, roomId }) {
         onChange={event => setMessage(event.target.value)}
         onKeyDown={handleEnterKeydown}
         value={message}
+        disabled={loading}
       />
     </form>
   )
