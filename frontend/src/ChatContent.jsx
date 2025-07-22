@@ -4,8 +4,9 @@ import { AuthContext } from "./App";
 import ChatBox from "./ChatBox";
 
 export default function ChatContent({ sessionId, selectedRoom }) {
-  const { setAuthenticated, accessToken, userId } = useContext(AuthContext);
+  const { userRole, setAuthenticated, accessToken, userId } = useContext(AuthContext);
   const [roomMessages, setRoomMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
   const WS_URL = `ws://localhost:8000/ws/${selectedRoom.room_id}`;
   const {
     sendJsonMessage,
@@ -34,6 +35,48 @@ export default function ChatContent({ sessionId, selectedRoom }) {
     }
   }, [lastJsonMessage]);
 
+  function delegatedDeleteHandler(event) {
+    if (event.target.tagName === "BUTTON") {
+      const chatId= event.target.closest("article").dataset.chatId;
+      setLoading(true)
+      fetch(`http://localhost:8000/api/rooms/${selectedRoom.room_id}/${chatId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+        },
+      })
+      .then(function(response) {
+        if (!response.ok) {
+          throw new Error("Delete failed");
+        }
+        return response.json();
+      })
+      .then(function(json) {
+        setRoomMessages(
+            roomMessages.filter(({ chat }) => chat.chat_id !== json.chat_id)
+        );
+      })
+      .catch(function(error) {
+        console.log(error.message);
+        setAuthenticated(false);
+      })
+      .finally(function() {
+        setLoading(false);
+      })
+    }
+  }
+
+  let messageDeleteButton = null;
+  if (userRole === "Admin" || userRole === "Mod") {
+     messageDeleteButton = (
+      <button
+        disabled={loading}
+      >
+        Delete
+      </button>
+    );
+  }
+
   const renderedMessages = roomMessages.map(function({ username, chat }) {
     return (
       <article
@@ -41,7 +84,7 @@ export default function ChatContent({ sessionId, selectedRoom }) {
         data-user-id={chat.user_id}
         data-chat-id={chat.chat_id}
       >
-        <h3>{username} ({chat.time})</h3>
+        <h3>{username} ({chat.time}) {messageDeleteButton}</h3>
         <p>{chat.message}</p>
       </article>
     )
@@ -49,7 +92,10 @@ export default function ChatContent({ sessionId, selectedRoom }) {
 
   return (
     <main className="chat-content">
-      <section className="messages-container">
+      <section
+        className="messages-container"
+        onClick={delegatedDeleteHandler}
+      >
         {renderedMessages}
       </section>
       <ChatBox
