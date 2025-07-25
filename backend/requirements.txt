@@ -1,0 +1,7 @@
+fastapi[standard]
+psycopg[binary]
+pyjwt
+passlib[bcrypt]
+bcrypt==4.0.1
+pytest
+

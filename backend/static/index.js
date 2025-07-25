@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", (_e) => {
     }
 
     // connect to websocket
-    ws = new WebSocket(`ws://localhost:8000/ws/${idValue}`);
+    ws = new WebSocket(`ws://chatapp-postgres:8000/ws/${idValue}`);
     ws.onmessage = handleSocketMessage;
 
     // hide id form, show chat form
