@@ -7,8 +7,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_DB: chatapp
       POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
   backend:
     build:
       context: ./backend
