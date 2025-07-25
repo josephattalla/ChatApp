@@ -1,6 +1,7 @@
 import psycopg
 import psycopg.sql as sql
 from psycopg.rows import class_row
+import time
 
 from .models import User, Chat, Room
 
@@ -301,9 +302,28 @@ def insertTestData():
     return data
 
 
+def wait_for_postgres(
+    dsn="dbname=chatapp user=postgres password=postgres host=chatapp-postgres port=5432",
+    max_attempts=10,
+    delay=2
+):
+    attempt = 0
+    while attempt < max_attempts:
+        try:
+            with psycopg.connect(dsn) as conn:
+                print("Postgres is ready!")
+                return
+        except psycopg.OperationalError as e:
+            print(f"Postgres not ready yet (attempt {attempt+1}/{max_attempts}): {e}")
+            attempt += 1
+            time.sleep(delay)
+    raise RuntimeError("Could not connect to Postgres after several attempts.")
+
+
 if __name__ == "__main__":
     from .init_db import init_db
 
+    wait_for_postgres()  # Wait for Postgres before initializing DB
     init_db()
     data = insertTestData()
 
