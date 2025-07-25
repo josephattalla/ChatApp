@@ -30,8 +30,11 @@ export default function ChatContent({ sessionId, selectedRoom }) {
         username: lastJsonMessage.username,
         chat: lastJsonMessage.chat,
       }])
-
+    } else if (lastJsonMessage?.type === "deleted message") {
+      const newMessages = roomMessages.filter(message => message.chat.chat_id !== lastJsonMessage.chat_id)
+      setRoomMessages(newMessages)
     }
+    console.log(roomMessages)
   }, [lastJsonMessage]);
 
   function delegatedDeleteHandler(event) {
