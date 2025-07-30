@@ -9,7 +9,7 @@ export default function LoginPage({ setSelectedPage }) {
     setUserId,
     setUserRole,
   } = useContext(AuthContext);
-  const [usernameField, setUsernameField] = useState("johndoe");
+  const [usernameField, setUsernameField] = useState("user");
   const [passwordField, setPasswordField] = useState("secret");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
