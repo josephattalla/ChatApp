@@ -1,39 +1,57 @@
 # Chat Application
 
-### Dependencies
-You can install dependencies using the provided [conda](https://anaconda.org/anaconda/conda) enviroment, `backend/enviroment.yml`.
+### Problem Description
 
-If you don't want to use a conda env you can install the current dependencies:
-```bash
-pip install fastapi
-pip install psycopg[binary]
-pip install pyjwt
-pip install passlib[bcrypt]
-pip install bcrypt==4.0.1
-pip install pytest
-```
+This application provides a group messaging service with role-based moderation and administration and real-time updates through websockets. Each part of the application is containerized with Docker to allow distributed deployment on the cloud.
 
-You will also need to have [PostgreSQL](https://www.postgresql.org/) on your device.
+### Interface Quirks
+
+Admin role configuration is located in the settings.
+
+### Backend Libraries
+
+- fastapi
+- psycopg
+- pyjwt
+- passlib
+- bcrypt
+- pytest
+
+### Frontend Libraries
+
+- vite
+- react
+- react-use-websocket
+
+### Other Resources
+
+- PostgreSQL
+- Docker
 
 ### Running the App
 
+The only dependency is docker.
+
 ```bash
-cd backend
-fastapi dev main.py
+docker-compose up
 ```
 
-### Backend File Structure
+The front page is accessible at http://localhost:5173/.
 
-```
-├── config
-├── controllers
-├── models
-├── static
-└── utils
-```
+#### Contributions
 
-- `config`: interface for enviroment variables. Currently not used but might be useful later.
-- `controllers`: defines API routes.
-- `models`: DB interface. Normally used to define the DB schemas, but the file in there now also has an interface to use the DB, making it simple and easy to use.
-- `static`: frontend files to serve to client.
-- `utils`: miscellaneous helpers.
+#### Joseph Attalla
+
+Built the API endpoints and the backend logic.
+
+#### Gabriel Clewis
+
+Wrote tests hitting the API endpoints.
+
+#### Justin Taing
+
+Initialized database schema and created models.
+
+#### Wilson Shi
+
+Built the interface and containerized the application.
