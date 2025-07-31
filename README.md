@@ -36,6 +36,13 @@ The only dependency is docker.
 docker-compose up
 ```
 
+Make sure to properly shut down the containers in between runs.
+
+
+```bash
+docker-compose down
+```
+
 The front page is accessible at http://localhost:5173/.
 
 #### Contributions
