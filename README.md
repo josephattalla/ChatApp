@@ -8,6 +8,8 @@ This application provides a group messaging service with role-based moderation a
 
 Admin role configuration is located in the settings.
 
+The default login is 'user' which has the lowest privileges. The 'mod' user has delete privileges, and the 'admin' user has role and room creation privileges. All passwords are 'secret'.
+
 ### Backend Libraries
 
 - fastapi
@@ -45,7 +47,7 @@ docker-compose down
 
 The front page is accessible at http://localhost:5173/.
 
-#### Contributions
+### Contributions
 
 #### Joseph Attalla
 
